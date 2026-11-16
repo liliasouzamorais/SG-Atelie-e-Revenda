@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dona Felis Atelie — Precificação, Orçamentos & Encomendas</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #fcf8f5;
+      --bg-card: #f5e5d8;
+      --bg-input: #ffffff;
+      --bg-hover: #ede0d4;
+      --border: #e0d0c0;
+      --text-main: #3d2c22;
+      --text-muted: #7a6558;
+      --accent: #ba4b2f;
+      --accent-hover: #a13e25;
+      --terracotta: #ba4b2f;
+      --peach: #f5e5d8;
+      --red-bg: rgba(186, 75, 47, 0.12);
+      --red-text: #ba4b2f;
+      --orange-bg: rgba(211, 84, 0, 0.12);
+      --orange-text: #d35400;
+      --yellow-bg: rgba(243, 156, 18, 0.12);
+      --yellow-text: #b7950b;
+      --blue-bg: rgba(41, 128, 185, 0.12);
+      --blue-text: #2980b9;
+      --green-bg: rgba(39, 174, 96, 0.12);
+      --green-text: #27ae60;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-main); padding: 24px; line-height: 1.45; }
+    .container { max-width: 1560px; margin: 0 auto; }
+
+    /* Header */
+    .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .header-title h1 { font-size: 1.45rem; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--terracotta); }
+    .header-title p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    /* Buttons */
+    .btn {
+      background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border);
+      padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s;
+    }
+    .btn:hover { background: var(--bg-hover); border-color: var(--terracotta); }
+    .btn-primary { background: var(--terracotta); border-color: var(--terracotta); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: transparent; border-color: var(--border); color: var(--text-muted); padding: 6px 12px; }
+    .btn-danger:hover { background: var(--red-bg); color: var(--red-text); border-color: rgba(186,75,47,0.4); }
+    .btn-sm { padding: 4px 8px; font-size: 0.78rem; border-radius: 6px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .tab-btn {
+      background: transparent; border: 1px solid transparent; color: var(--text-muted);
+      padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--bg-card); color: var(--terracotta); border-color: var(--border); }
+
+    /* KPIs */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-card span { font-size: 0.78rem; color: var(--text-muted); display: block; }
+    .kpi-card strong { font-size: 1.35rem; font-weight: 700; margin-top: 4px; display: block; color: var(--terracotta); }
+
+    /* Cards & Accordions */
+    details.rules-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 18px; margin-bottom: 18px;
+    }
+    details.rules-box summary {
+      cursor: pointer; font-weight: 600; font-size: 0.95rem; color: var(--text-main);
+      list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    details.rules-box summary::before { content: "▶"; font-size: 0.75rem; color: var(--text-muted); transition: transform 0.2s; margin-right: 6px; }
+    details.rules-box[open] summary::before { transform: rotate(90deg); }
+
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 14px; }
+    .sub-panel { background: #ffffff; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+    .sub-panel h4 { font-size: 0.88rem; color: var(--terracotta); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+    .field-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.82rem; }
+    .field-row label { color: var(--text-muted); flex: 1; }
+    .field-row input {
+      width: 110px; background: var(--bg-input); border: 1px solid var(--border);
+      color: var(--text-main); padding: 5px 8px; border-radius: 6px; font-size: 0.84rem; text-align: right;
+    }
+
+    /* Table */
+    .table-wrapper {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th {
+      padding: 13px 14px; font-size: 0.8rem; font-weight: 500; color: var(--text-muted);
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    td {
+      padding: 14px 14px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.88rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-hover); }
+
+    .prod-title { font-weight: 600; color: var(--text-main); font-size: 0.93rem; margin-bottom: 3px; }
+    .cell-main { font-weight: 500; color: var(--text-main); }
+    .cell-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+
+    /* Badges */
+    .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 6px;
+      font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+    }
+    .badge-normal { background: var(--green-bg); color: var(--green-text); }
+    .badge-leve { background: var(--blue-bg); color: var(--blue-text); }
+    .badge-promo { background: var(--yellow-bg); color: var(--yellow-text); }
+    .badge-queima { background: var(--orange-bg); color: var(--orange-text); }
+
+    .qty-controls { display: inline-flex; align-items: center; gap: 6px; }
+    .qty-btn {
+      background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
+      width: 22px; height: 22px; border-radius: 5px; cursor: pointer; font-weight: bold;
+    }
+    .qty-btn:hover { background: var(--terracotta); color: #fff; border-color: var(--terracotta); }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      align-items: center; justify-content: center; z-index: 50; padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      width: 100%; max-width: 820px; max-height: 92vh; overflow-y: auto; padding: 24px; color: #3d2c22;
+    }
+    .modal h2 { font-size: 1.15rem; margin-bottom: 14px; color: var(--terracotta); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-group { margin-bottom: 8px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+      color: var(--text-main); padding: 8px 10px; border-radius: 7px; font-size: 0.88rem;
+    }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+    .mini-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.82rem; }
+    .mini-table th, .mini-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+    .mini-table input {
+      background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
+      padding: 5px 8px; border-radius: 6px; font-size: 0.82rem; width: 100%;
+    }
+
+    /* ESTILO EXCLUSIVO DA FOLHA DE ORÇAMENTO (IMPRESSÃO) */
+    .orcamento-preview-sheet {
+      background: #fdfaf7;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px;
+      color: #3d2c22;
+      box-shadow: 0 10px 25px rgba(186,75,47,0.08);
+      position: relative;
+    }
+
+    .orc-header-bar {
+      background-color: var(--terracotta);
+      color: white;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 4px;
+      margin-top: 14px;
+      margin-bottom: 24px;
+    }
+
+    .orc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      margin-bottom: 30px;
+    }
+    .orc-table th {
+      border-bottom: 2px solid var(--terracotta);
+      color: var(--terracotta);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 10px 8px;
+    }
+    .orc-table td {
+      padding: 12px 8px;
+      border-bottom: 1px solid #ebdcd0;
+      font-size: 0.9rem;
+    }
+
+    .orc-total-box {
+      background-color: #f0e1d5;
+      padding: 12px 20px;
+      border-radius: 6px;
+      text-align: right;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--terracotta);
+      margin-bottom: 30px;
+    }
+
+    .orc-footer-bar {
+      background-color: var(--terracotta);
+      color: white;
+      text-align: center;
+      padding: 12px;
+      font-size: 0.82rem;
+      border-radius: 6px;
+      margin-top: 40px;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printAreaOrcamento, #printAreaOrcamento * { visibility: visible; }
+      #printAreaOrcamento {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+        padding: 20mm;
+        background: white;
+      }
+      .no-print { display: none !important; }
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-title">
+      <h1>🎨 Dona Felis Atelie e Presentes</h1>
+      <p>Gerenciamento completo de precificação, fichas técnicas e orçamentos imprimíveis.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="openModalFichaTecnica()">+ Nova Ficha de Precificação</button>
+      <button class="btn" style="border-color: var(--terracotta); color: var(--terracotta);" onclick="openModalOrcamento()">+ Novo Orçamento</button>
+      <button class="btn" onclick="exportarExcelAtelie()">📤 Exportar Backup (.xlsx)</button>
+      <a href="sistema_revenda_dona_felis.html" target="_blank" class="btn" style="text-decoration:none; border-color: var(--terracotta); color: var(--terracotta);">🛍️ Abrir Janela da Revenda ↗</a>
+    </div>
+  </div>
+
+  <!-- Abas Exclusivas do Ateliê -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTabAtelie('precificacao', this)">📐 Precificação & Fichas Técnicas</button>
+    <button class="tab-btn" onclick="switchTabAtelie('orcamentos', this)">📄 Orçamentos & Propostas</button>
+    <button class="tab-btn" onclick="switchTabAtelie('producao', this)">🧶 Encomendas & Pronta Entrega</button>
+  </div>
+
+  <!-- ABA 1: PRECIFICAÇÃO & FICHAS TÉCNICAS -->
+  <div id="tab-precificacao">
+    <details class="rules-box" open>
+      <summary>
+        <span>⚙️ Estrutura de Custos & Índice de Comercialização (IC)</span>
+        <span id="resumoICHeader" style="font-size:0.84rem; color:var(--terracotta); font-weight:700;">IC Atual: 54,97% (0,5497)</span>
+      </summary>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">
+        Despesas fixas, pró-labore, MEI/DAS, salário mínimo de referência para hora trabalhada e margem de lucro.
+      </p>
+
+      <div class="grid-3">
+        <div class="sub-panel">
+          <h4>1. Despesas Fixas & Proporcionais (R$/mês)</h4>
+          <div class="field-row">
+            <label>MEI / DAS (Atualização Anual)</label>
+            <input type="number" step="0.01" id="cfgMei" onchange="salvarConfigIC()" title="Valor mensal da guia DAS MEI" />
+          </div>
+          <div class="field-row"><label>Aluguel / Água / Energia</label><input type="number" step="0.01" id="cfgEstrutura" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Internet / Telefone / Apps</label><input type="number" step="0.01" id="cfgComunicacao" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Embalagens / Tags / Impressos</label><input type="number" step="0.01" id="cfgEmbalagem" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Manutenção Máquinas / Ferramentas</label><input type="number" step="0.01" id="cfgManutencao" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Linhas / Insumos Gerais / Tinta</label><input type="number" step="0.01" id="cfgInsumosGerais" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Gasolina / Transporte / Feiras</label><input type="number" step="0.01" id="cfgTransporte" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Divulgação / Patrocinados</label><input type="number" step="0.01" id="cfgDivulgacao" onchange="salvarConfigIC()" /></div>
+        </div>
+
+        <div class="sub-panel">
+          <h4>2. Salários, Provisões & Meta Mensal</h4>
+          <div class="field-row">
+            <label>Salário Mínimo / Referência (R$)</label>
+            <input type="number" step="10" id="cfgSalarioMinimo" onchange="atualizarHoraPorSalarioMinimo()" title="Atualiza o valor da hora trabalhada automaticamente" />
+          </div>
+          <div class="field-row"><label>Pró-labore (Seu salário mensal R$)</label><input type="number" step="0.01" id="cfgProLabore" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Salário de Auxiliares (R$)</label><input type="number" step="0.01" id="cfgAuxiliares" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Provisão 13º (Pró-labore ÷ 12)</label><input type="text" id="cfgProv13" disabled style="opacity:0.75;" /></div>
+          <div class="field-row"><label>Provisão Férias (13º + 33%)</label><input type="text" id="cfgProvFerias" disabled style="opacity:0.75;" /></div>
+          <div class="field-row" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
+            <label style="color:var(--text-main); font-weight:600;">Total Despesas Fixas (R$)</label>
+            <input type="text" id="cfgTotalFixasReais" disabled style="font-weight:700; color:var(--terracotta);" />
+          </div>
+          <div class="field-row">
+            <label style="color:var(--text-main); font-weight:600;">Média / Meta Faturamento (R$)</label>
+            <input type="number" step="10" id="cfgMetaFaturamento" onchange="salvarConfigIC()" />
+          </div>
+          <div class="field-row">
+            <label style="color:var(--terracotta); font-weight:600;">Despesas Fixas (%)</label>
+            <input type="text" id="cfgFixasPct" disabled style="font-weight:700; color:var(--terracotta);" />
+          </div>
+        </div>
+
+        <div class="sub-panel">
+          <h4>3. Taxas Variáveis, Lucro & Índice (IC)</h4>
+          <div class="field-row"><label>Taxa Plataforma + Meio de Pgto (%)</label><input type="number" step="0.1" id="cfgTaxaPgto" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Comissão Loja / Vendedor (%)</label><input type="number" step="0.1" id="cfgComissao" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Total Despesas Variáveis (%)</label><input type="text" id="cfgVariaveisPct" disabled style="opacity:0.85;" /></div>
+          <div class="field-row"><label style="color:var(--terracotta); font-weight:600;">Margem de Lucro Desejada (%)</label><input type="number" step="0.5" id="cfgLucroPct" onchange="salvarConfigIC()" /></div>
+          <div class="field-row"><label>Valor da Hora Artesanal (R$/h)</label><input type="number" step="0.5" id="cfgValorHoraPadrao" onchange="salvarConfigIC()" /></div>
+
+          <div style="margin-top:12px; padding:12px; border-radius:8px; background:var(--peach); border:1px solid var(--border);">
+            <div style="font-size:0.78rem; color:var(--text-muted);">Índice de Comercialização (IC = 100% - Fixas - Variáveis - Lucro)</div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:4px;">
+              <strong id="cfgICValor" style="font-size:1.3rem; color:var(--terracotta);">0,5497</strong>
+              <span id="cfgICPorcentagem" style="font-size:0.85rem; color:var(--terracotta); font-weight:600;">(54,97% do preço)</span>
+            </div>
+            <div style="font-size:0.74rem; color:var(--text-muted); margin-top:4px;">Fórmula: Preço de Venda = Custo Direto Total ÷ IC</div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="kpi-grid" id="kpisPrecificacao"></div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+      <div>
+        <h3 style="font-size:1.02rem;">📋 Fichas Técnicas de Precificação Salvas</h3>
+        <p style="font-size:0.8rem; color:var(--text-muted);">Cada peça salva mantém sua lista detalhada de materiais, tempo de confecção e preço calculado pelo IC.</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="filtroBuscaFicha" placeholder="Buscar ficha técnica..." oninput="renderFichas()" style="background:var(--bg-card); border:1px solid var(--border); color:var(--text-main); padding:7px 12px; border-radius:8px; font-size:0.84rem; min-width:220px;" />
+        <button class="btn btn-primary" onclick="openModalFichaTecnica()">+ Nova Ficha Técnica</button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table style="min-width: 1050px;">
+        <thead>
+          <tr>
+            <th>Peça / Categoria</th>
+            <th>Materiais Detalhados</th>
+            <th>Custo Materiais</th>
+            <th>Mão de Obra</th>
+            <th>Custo Direto Total</th>
+            <th>Preço de Venda (÷ IC)</th>
+            <th>Lucro Líquido Estimado</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="fichasBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ABA 2: ORÇAMENTOS & PROPOSTAS -->
+  <div id="tab-orcamentos" class="hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+      <div>
+        <h2 style="font-size:1.1rem;">📄 Gerador de Orçamentos para Clientes</h2>
+        <p style="font-size:0.84rem; color:var(--text-muted);">Crie propostas comerciais profissionais idênticas ao modelo institucional do Ateliê com opção de impressão direta.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModalOrcamento()">+ Novo Orçamento</button>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Número / Data</th>
+            <th>Cliente / Contato</th>
+            <th>Endereço / Empresa</th>
+            <th>Total Proposta</th>
+            <th>Validade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="orcamentosListBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ABA 3: ENCOMENDAS & PRONTA ENTREGA -->
+  <div id="tab-producao" class="hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+      <div>
+        <h2 style="font-size:1.1rem;">🧶 Fila de Encomendas & Estoque Pronta Entrega</h2>
+        <p style="font-size:0.84rem; color:var(--text-muted);">Controle prazos de entrega, sinais pagos e peças disponíveis para venda imediata.</p>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn" onclick="openModalCatalogoItem()">+ Adicionar Peça Pronta Entrega</button>
+        <button class="btn btn-primary" onclick="openModalEncomenda()">+ Nova Encomenda de Cliente</button>
+      </div>
+    </div>
+
+    <div class="kpi-grid" id="kpisProducao"></div>
+
+    <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:18px; align-items:start;">
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <h3 style="font-size:0.98rem;">📅 Encomendas de Clientes</h3>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="filtroBuscaEncomenda" placeholder="Buscar cliente ou peça..." oninput="renderProducao()" style="background:var(--bg-card); border:1px solid var(--border); color:var(--text-main); padding:6px 10px; border-radius:7px; font-size:0.82rem;" />
+            <select id="filtroStatusEncomenda" onchange="renderProducao()" style="background:var(--bg-card); border:1px solid var(--border); color:var(--text-main); padding:6px 10px; border-radius:7px; font-size:0.82rem;">
+              <option value="ATIVAS">Em aberto</option>
+              <option value="TODAS">Todas</option>
+              <option value="A fazer">A fazer</option>
+              <option value="Em produção">Em produção</option>
+              <option value="Pronta">Pronta</option>
+              <option value="Entregue">Entregue</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table style="min-width: 620px;">
+            <thead>
+              <tr>
+                <th>Cliente / Prazo</th>
+                <th>Peça & Personalização</th>
+                <th>Valor / Sinal</th>
+                <th>Etapa</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="encomendasBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px;">
+          <h3 style="font-size:0.98rem;">🏷️ Catálogo & Pronta Entrega</h3>
+          <input type="text" id="filtroBuscaCatalogo" placeholder="Filtrar peça..." oninput="renderProducao()" style="background:var(--bg-card); border:1px solid var(--border); color:var(--text-main); padding:6px 10px; border-radius:7px; font-size:0.82rem; width:160px;" />
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Peça</th>
+                <th>Pronta Ent.</th>
+                <th>Custo / Venda</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="catalogoBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FICHA TÉCNICA -->
+<div class="modal-backdrop" id="modalFichaTecnica">
+  <div class="modal" style="max-width: 860px;">
+    <h2 id="tituloModalFicha">📐 Ficha Técnica de Custo & Precificação</h2>
+    <input type="hidden" id="fichaEditId" value="" />
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nome do Produto / Peça *</label>
+        <input type="text" id="fNome" placeholder="Ex: Porta Documentos / Capa Tablet 11 pol." />
+      </div>
+      <div class="form-group">
+        <label>Linha / Categoria</label>
+        <select id="fCategoria">
+          <option value="Organizadores & Cases">Organizadores & Cases</option>
+          <option value="Crochê & Amigurumi">Crochê & Amigurumi</option>
+          <option value="Personalizados (Plotter / Termotransfer)">Personalizados (Plotter / Termotransfer)</option>
+          <option value="Kits & Presentes">Kits & Presentes</option>
+          <option value="Outros Artesanais">Outros Artesanais</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:10px; border-top:1px solid var(--border); padding-top:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+        <strong style="font-size:0.92rem;">🧵 Materiais Utilizados na Peça</strong>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm" style="border-color:var(--terracotta); color:var(--terracotta);" onclick="toggleAuxCorte()">📏 Calculadora de Corte / m²</button>
+          <button class="btn btn-sm" onclick="adicionarLinhaMaterialFicha()">+ Adicionar Material</button>
+        </div>
+      </div>
+
+      <div id="boxAuxCorte" class="hidden" style="background:#ffffff; border:1px solid var(--terracotta); border-radius:10px; padding:14px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="font-size:0.86rem; color:var(--terracotta);">📐 Cálculo Auxiliar do Valor do Material por m² / Cortes</strong>
+          <button class="btn btn-sm" onclick="toggleAuxCorte()">Fechar</button>
+        </div>
+        <div class="form-grid" style="grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:10px;">
+          <div class="form-group"><label>Nome do Material</label><input type="text" id="auxMatNome" placeholder="Ex: Tecido" /></div>
+          <div class="form-group"><label>Largura (m)</label><input type="number" step="0.01" id="auxLargCompra" value="1.40" oninput="recalcularAuxCorte()" /></div>
+          <div class="form-group"><label>Comprimento (m)</label><input type="number" step="0.01" id="auxCompCompra" value="1.00" oninput="recalcularAuxCorte()" /></div>
+          <div class="form-group"><label>Valor Pago (R$)</label><input type="number" step="0.01" id="auxValorPago" value="40.00" oninput="recalcularAuxCorte()" /></div>
+        </div>
+        <table class="mini-table">
+          <thead><tr><th>Descrição</th><th>Largura</th><th>Comprimento</th><th>Área</th><th></th></tr></thead>
+          <tbody id="auxCortesBody"></tbody>
+        </table>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+          <div style="font-size:0.82rem;">Custo calculado: <strong id="auxCustoFinal" style="color:var(--terracotta);">R$ 0,00</strong></div>
+          <button class="btn btn-primary btn-sm" onclick="enviarAuxParaMateriais()">⬇️ Inserir na Lista</button>
+        </div>
+      </div>
+
+      <table class="mini-table">
+        <thead><tr><th>Material / Insumo</th><th>Observação / Medida</th><th>Custo (R$)</th><th></th></tr></thead>
+        <tbody id="fichaMateriaisBody"></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:14px; border-top:1px solid var(--border); padding-top:12px;">
+      <strong style="font-size:0.92rem; display:block; margin-bottom:8px;">⏱️ Mão de Obra & Resultado</strong>
+      <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="form-group"><label>Tempo (horas)</label><input type="number" step="0.1" id="fHoras" value="1" oninput="recalcularTotaisFichaModal()" /></div>
+        <div class="form-group"><label>Valor da Hora (R$/h)</label><input type="number" step="0.5" id="fValorHora" value="13" oninput="recalcularTotaisFichaModal()" /></div>
+        <div class="form-group"><label>Preço Praticado (Opcional)</label><input type="number" step="0.01" id="fPrecoPraticado" placeholder="Arredondamento" oninput="recalcularTotaisFichaModal()" /></div>
+      </div>
+      <div style="background:var(--peach); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-top:8px; display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
+        <div><span style="font-size:0.75rem; color:var(--text-muted);">Materiais</span><strong id="resModalMat">R$ 0,00</strong></div>
+        <div><span style="font-size:0.75rem; color:var(--text-muted);">Mão de Obra</span><strong id="resModalMaoObra">R$ 0,00</strong></div>
+        <div><span style="font-size:0.75rem; color:var(--text-muted);">Custo Direto</span><strong id="resModalCustoTotal">R$ 0,00</strong></div>
+        <div><span style="font-size:0.75rem; color:var(--text-muted);">Preço Sugerido (÷ IC)</span><strong id="resModalPrecoSugerido" style="color:var(--terracotta); font-size:1.15rem;">R$ 0,00</strong></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modalFichaTecnica')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarFichaTecnica()">💾 Salvar Ficha</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CRIAR / VISUALIZAR ORÇAMENTO -->
+<div class="modal-backdrop" id="modalOrcamento">
+  <div class="modal" style="max-width: 850px;">
+    <h2>📄 Emitir Orçamento Comercial</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Número do Orçamento *</label>
+        <input type="text" id="orcNum" value="#00001" />
+      </div>
+      <div class="form-group">
+        <label>Data *</label>
+        <input type="date" id="orcData" />
+      </div>
+      <div class="form-group">
+        <label>Nome do Cliente / A/C *</label>
+        <input type="text" id="orcCliente" placeholder="Ex: Raísa Camargo / Hyunday Cometa" />
+      </div>
+      <div class="form-group">
+        <label>Telefone / WhatsApp</label>
+        <input type="text" id="orcTel" placeholder="(65) 99808-7865" />
+      </div>
+      <div class="form-group full">
+        <label>Endereço do Cliente</label>
+        <input type="text" id="orcEndereco" placeholder="Av. Brasil, 2049S - Jardim Cidade Alta, Tangará da Serra" />
+      </div>
+      <div class="form-group">
+        <label>Forma de Pagamento</label>
+        <input type="text" id="orcPgto" value="Pix ou Boleto Bancário" />
+      </div>
+      <div class="form-group">
+        <label>Termos e Condições</label>
+        <input type="text" id="orcTermos" value="Este orçamento é válido por 30 dias." />
+      </div>
+    </div>
+
+    <div style="margin-top:12px; border-top:1px solid var(--border); padding-top:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <strong>Itens do Orçamento</strong>
+        <button class="btn btn-sm" onclick="adicionarLinhaItemOrcamento()">+ Adicionar Item</button>
+      </div>
+      <table class="mini-table">
+        <thead><tr><th>Item / Título</th><th>Descrição / Detalhes</th><th>Valor Un. (R$)</th><th>Quant.</th><th></th></tr></thead>
+        <tbody id="orcItensBody"></tbody>
+      </table>
+    </div>
+
+    <div class="modal-actions" style="justify-content:space-between; align-items:center;">
+      <button class="btn" onclick="closeModal('modalOrcamento')">Cancelar</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary" onclick="salvarEVisualizarOrcamento()">🖨️ Visualizar & Imprimir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VISUALIZAÇÃO PRONTA PARA IMPRESSÃO -->
+<div class="modal-backdrop" id="modalVisualizacaoImpressao">
+  <div class="modal" style="max-width: 860px; padding: 0; background: transparent;">
+    <div style="background: #fff; padding: 15px; display:flex; justify-content: flex-end; gap: 10px; border-top-left-radius: 12px; border-top-right-radius: 12px;" class="no-print">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir Orçamento / Salvar PDF</button>
+      <button class="btn" onclick="closeModal('modalVisualizacaoImpressao')">Fechar</button>
+    </div>
+    <div id="printAreaOrcamento" class="orcamento-preview-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--terracotta); letter-spacing: 0.5px;">DONA FELIS ATELIÊ E PRESENTES</h2>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:2px;">CNPJ: 58.088.773/0001-12</div>
+        </div>
+      </div>
+      <div class="orc-header-bar">
+        Data: <span id="prevData">24/02/2026</span> | Orçamento <span id="prevNum">#00001</span>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <div style="font-size: 1.05rem; font-weight: 700; color: var(--terracotta); margin-bottom: 6px;">A/C:</div>
+        <div id="prevClienteInfo" style="font-size: 0.92rem; line-height: 1.5; color: #3d2c22;">
+          <b>Raísa Camargo / Hyunday Cometa</b><br>
+          (65) 99808-7865<br>
+          Av. Brasil, 2049S - Jardim Cidade Alta, Tangará da Serra
+        </div>
+      </div>
+
+      <table class="orc-table">
+        <thead>
+          <tr>
+            <th style="width: 30%;">ITEM</th>
+            <th style="width: 40%;">DESCRIÇÃO</th>
+            <th style="width: 15%; text-align: right;">VALOR UNID.</th>
+            <th style="width: 15%; text-align: center;">QUANT.</th>
+          </tr>
+        </thead>
+        <tbody id="prevItensBody"></tbody>
+      </table>
+
+      <div class="orc-total-box">
+        TOTAL: R$ <span id="prevTotal">1.200,00</span>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
+        <div style="width: 260px; text-align: left;">
+          <div style="border-bottom: 1px solid var(--terracotta); margin-bottom: 10px;"></div>
+          <div style="font-weight: 700; color: var(--terracotta); font-size: 0.9rem; margin-bottom: 4px;">FORMA DE PAGAMENTO</div>
+          <div id="prevPgto" style="font-size: 0.85rem; color: #3d2c22; margin-bottom: 16px;">Pix ou Boleto Bancário</div>
+
+          <div style="font-weight: 700; color: var(--terracotta); font-size: 0.9rem; margin-bottom: 4px;">TERMOS E CONDIÇÕES</div>
+          <div id="prevTermos" style="font-size: 0.82rem; color: #3d2c22;">Este orçamento é válido por 30 dias.</div>
+        </div>
+      </div>
+
+      <div class="orc-footer-bar">
+        📞 (14) 9814376-12 &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ✉️ lilia.souzamorais@gmail.com &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 🌐 https://donafelisatelie.lojavirtualnuvem.com.br/
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENCOMENDA -->
+<div class="modal-backdrop" id="modalEncomenda">
+  <div class="modal" style="max-width: 580px;">
+    <h2>🧶 Nova Encomenda do Ateliê</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Cliente *</label>
+        <input type="text" id="encCliente" placeholder="Nome do cliente" />
+      </div>
+      <div class="form-group">
+        <label>Prazo de Entrega *</label>
+        <input type="date" id="encPrazo" />
+      </div>
+      <div class="form-group full">
+        <label>Puxar de Ficha Técnica / Catálogo (opcional)</label>
+        <select id="encSelectOrigem" onchange="preencherOrigemEncomenda()">
+          <option value="">-- Selecionar ficha salva ou digitar abaixo --</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Peça Encomendada *</label>
+        <input type="text" id="encPeca" placeholder="Ex: Porta Documentos Personalizado" />
+      </div>
+      <div class="form-group full">
+        <label>Detalhes / Personalização</label>
+        <input type="text" id="encDetalhes" placeholder="Ex: Estampa floral, nome bordado/aplicado..." />
+      </div>
+      <div class="form-group">
+        <label>Quantidade</label>
+        <input type="number" id="encQtd" value="1" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Valor Total (R$)</label>
+        <input type="number" step="0.01" id="encValorTotal" placeholder="0.00" />
+      </div>
+      <div class="form-group">
+        <label>Sinal Pago (R$)</label>
+        <input type="number" step="0.01" id="encSinal" value="0" />
+      </div>
+      <div class="form-group">
+        <label>Etapa</label>
+        <select id="encStatus">
+          <option value="A fazer">A fazer</option>
+          <option value="Em produção">Em produção</option>
+          <option value="Pronta">Pronta</option>
+          <option value="Entregue">Entregue</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modalEncomenda')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEncomenda()">✅ Salvar Encomenda</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ITEM PRONTA ENTREGA -->
+<div class="modal-backdrop" id="modalCatalogoItem">
+  <div class="modal" style="max-width: 520px;">
+    <h2>🏷️ Peça Pronta Entrega</h2>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nome da Peça *</label>
+        <input type="text" id="catNome" placeholder="Ex: Porta Documentos" />
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <input type="text" id="catCategoria" value="Organizadores & Cases" />
+      </div>
+      <div class="form-group">
+        <label>Qtd Pronta Entrega</label>
+        <input type="number" id="catQtd" value="1" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Custo Direto (R$)</label>
+        <input type="number" step="0.01" id="catCusto" placeholder="0.00" />
+      </div>
+      <div class="form-group">
+        <label>Preço de Venda (R$)</label>
+        <input type="number" step="0.01" id="catVenda" placeholder="0.00" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modalCatalogoItem')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCatalogoItem()">Salvar Peça</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Configuração inicial fiel à planilha "Planilha de Precificação_Tamires_Coutinho_MCV.xlsx"
+  const DEFAULT_CONFIG_IC = {
+    mei: 76.60,
+    estrutura: 0,
+    comunicacao: 0,
+    embalagem: 40.00, // 20 impressos + 20 embalagem
+    manutencao: 20.00,
+    insumosGerais: 12.00, // 5 tinta + 7 linha
+    transporte: 20.00,
+    divulgacao: 50.00,
+    proLabore: 1200.00,
+    auxiliares: 0,
+    metaFaturamento: 5000.00,
+    taxaPgto: 12.0,
+    comissao: 0,
+    lucroPct: 20.0,
+    valorHoraPadrao: 13.00,
+    salarioMinimoRef: 1412.00
+  };
+
+  // Exemplo inicial idêntico à ficha "porta documentos" da planilha da professora
+  const DEFAULT_FICHAS = [
+    {
+      id: 1,
+      nome: "Porta Documentos (Modelo Curso MCV)",
+      categoria: "Organizadores & Cases",
+      materiais: [
+        { nome: "Tecido", obs: "0,4374 m² (corte)", custo: 12.00 },
+        { nome: "Manta", obs: "", custo: 0 },
+        { nome: "Etiqueta", obs: "", custo: 0 },
+        { nome: "Zíper", obs: "", custo: 0 },
+        { nome: "Cursor", obs: "", custo: 0 },
+        { nome: "Bagum", obs: "", custo: 0 }
+      ],
+      horas: 1.0,
+      valorHora: 13.00,
+      precoPraticado: 45.48
+    }
+  ];
+
+  let configIC = JSON.parse(localStorage.getItem("df_atelie_config_ic")) || DEFAULT_CONFIG_IC;
+  if (!configIC.salarioMinimoRef) configIC.salarioMinimoRef = 1412.00;
+
+  let fichas = JSON.parse(localStorage.getItem("df_atelie_fichas")) || DEFAULT_FICHAS;
+  let catalogoAtelie = JSON.parse(localStorage.getItem("df_atelie_pecas")) || [];
+  let encomendasAtelie = JSON.parse(localStorage.getItem("df_atelie_encomendas")) || [];
+  let orcamentos = JSON.parse(localStorage.getItem("df_atelie_orcamentos")) || [
+    {
+      id: 1,
+      num: "#00001",
+      data: "2026-02-24",
+      cliente: "Raísa Camargo / Hyunday Cometa",
+      tel: "(65) 99808-7865",
+      endereco: "Av. Brasil, 2049S - Jardim Cidade Alta, Tangará da Serra",
+      pgto: "Pix ou Boleto Bancário",
+      termos: "Este orçamento é válido por 30 dias.",
+      itens: [
+        { item: "Kit presenteável - Dia da Mulher", desc: "• 1 Necesserie trapézio P\n• 1 Creme de Mão Eudora Instance Baunilha\n• 1 Creme Hidratante Eudora Instance Baunilha", valorUn: 50.00, quant: 24 }
+      ],
+      total: 1200.00
+    }
+  ];
+
+  function salvarDadosAtelie() {
+    localStorage.setItem("df_atelie_config_ic", JSON.stringify(configIC));
+    localStorage.setItem("df_atelie_fichas", JSON.stringify(fichas));
+    localStorage.setItem("df_atelie_pecas", JSON.stringify(catalogoAtelie));
+    localStorage.setItem("df_atelie_encomendas", JSON.stringify(encomendasAtelie));
+    localStorage.setItem("df_atelie_orcamentos", JSON.stringify(orcamentos));
+  }
+
+  function formatBRL(val) {
+    return Number(val || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function formatDateBR(iso) {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-");
+    return `${d}/${m}/${y}`;
+  }
+
+  function diffDays(dateA, dateB) {
+    const utc1 = Date.UTC(dateA.getFullYear(), dateA.getMonth(), dateA.getDate());
+    const utc2 = Date.UTC(dateB.getFullYear(), dateB.getMonth(), dateB.getDate());
+    return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+  }
+
+  // Atualiza automaticamente a hora trabalhada com base na alteração do Salário Mínimo (Referência 160h/mês)
+  function atualizarHoraPorSalarioMinimo() {
+    const salMin = Number(document.getElementById("cfgSalarioMinimo").value) || 1412;
+    configIC.salarioMinimoRef = salMin;
+    const horaCalculada = Number((salMin / 160).toFixed(2));
+    configIC.valorHoraPadrao = horaCalculada;
+    document.getElementById("cfgValorHoraPadrao").value = horaCalculada;
+    salvarConfigIC();
+  }
+
+  // Cálculo exato do Índice de Comercialização (IC) conforme planilha
+  function calcularMetricasIC() {
+    const prov13 = (Number(configIC.proLabore) || 0) / 12;
+    const provFerias = (prov13 * 0.33) + prov13;
+    const totalFixasReais =
+      (Number(configIC.mei) || 0) +
+      (Number(configIC.estrutura) || 0) +
+      (Number(configIC.comunicacao) || 0) +
+      (Number(configIC.embalagem) || 0) +
+      (Number(configIC.manutencao) || 0) +
+      (Number(configIC.insumosGerais) || 0) +
+      (Number(configIC.transporte) || 0) +
+      (Number(configIC.divulgacao) || 0) +
+      (Number(configIC.proLabore) || 0) +
+      (Number(configIC.auxiliares) || 0) +
+      prov13 +
+      provFerias;
+
+    const meta = Math.max(1, Number(configIC.metaFaturamento) || 5000);
+    const fixasPct = (totalFixasReais / meta) * 100;
+    const variaveisPct = (Number(configIC.taxaPgto) || 0) + (Number(configIC.comissao) || 0);
+    const lucroPct = Number(configIC.lucroPct) || 0;
+
+    // IC = (100 - DespesasFixas% - DespesasVariaveis% - Lucro%) / 100
+    const custoProdutoPct = Math.max(5, 100 - fixasPct - variaveisPct - lucroPct);
+    const ic = custoProdutoPct / 100;
+
+    return { prov13, provFerias, totalFixasReais, fixasPct, variaveisPct, lucroPct, custoProdutoPct, ic };
+  }
+
+  function carregarInputsConfigIC() {
+    document.getElementById("cfgMei").value = configIC.mei;
+    document.getElementById("cfgSalarioMinimo").value = configIC.salarioMinimoRef || 1412;
+    document.getElementById("cfgEstrutura").value = configIC.estrutura;
+    document.getElementById("cfgComunicacao").value = configIC.comunicacao;
+    document.getElementById("cfgEmbalagem").value = configIC.embalagem;
+    document.getElementById("cfgManutencao").value = configIC.manutencao;
+    document.getElementById("cfgInsumosGerais").value = configIC.insumosGerais;
+    document.getElementById("cfgTransporte").value = configIC.transporte;
+    document.getElementById("cfgDivulgacao").value = configIC.divulgacao;
+    document.getElementById("cfgProLabore").value = configIC.proLabore;
+    document.getElementById("cfgAuxiliares").value = configIC.auxiliares;
+    document.getElementById("cfgMetaFaturamento").value = configIC.metaFaturamento;
+    document.getElementById("cfgTaxaPgto").value = configIC.taxaPgto;
+    document.getElementById("cfgComissao").value = configIC.comissao;
+    document.getElementById("cfgLucroPct").value = configIC.lucroPct;
+    document.getElementById("cfgValorHoraPadrao").value = configIC.valorHoraPadrao;
+    atualizarDisplayIC();
+  }
+
+  function salvarConfigIC() {
+    configIC.mei = Number(document.getElementById("cfgMei").value) || 0;
+    configIC.salarioMinimoRef = Number(document.getElementById("cfgSalarioMinimo").value) || 1412;
+    configIC.estrutura = Number(document.getElementById("cfgEstrutura").value) || 0;
+    configIC.comunicacao = Number(document.getElementById("cfgComunicacao").value) || 0;
+    configIC.embalagem = Number(document.getElementById("cfgEmbalagem").value) || 0;
+    configIC.manutencao = Number(document.getElementById("cfgManutencao").value) || 0;
+    configIC.insumosGerais = Number(document.getElementById("cfgInsumosGerais").value) || 0;
+    configIC.transporte = Number(document.getElementById("cfgTransporte").value) || 0;
+    configIC.divulgacao = Number(document.getElementById("cfgDivulgacao").value) || 0;
+    configIC.proLabore = Number(document.getElementById("cfgProLabore").value) || 0;
+    configIC.auxiliares = Number(document.getElementById("cfgAuxiliares").value) || 0;
+    configIC.metaFaturamento = Math.max(1, Number(document.getElementById("cfgMetaFaturamento").value) || 5000);
+    configIC.taxaPgto = Number(document.getElementById("cfgTaxaPgto").value) || 0;
+    configIC.comissao = Number(document.getElementById("cfgComissao").value) || 0;
+    configIC.lucroPct = Number(document.getElementById("cfgLucroPct").value) || 0;
+    configIC.valorHoraPadrao = Number(document.getElementById("cfgValorHoraPadrao").value) || 13;
+
+    salvarDadosAtelie();
+    atualizarDisplayIC();
+    renderFichas();
+  }
+
+  function atualizarDisplayIC() {
+    const m = calcularMetricasIC();
+    document.getElementById("cfgProv13").value = "R$ " + formatBRL(m.prov13);
+    document.getElementById("cfgProvFerias").value = "R$ " + formatBRL(m.provFerias);
+    document.getElementById("cfgTotalFixasReais").value = "R$ " + formatBRL(m.totalFixasReais);
+    document.getElementById("cfgFixasPct").value = m.fixasPct.toFixed(3).replace(".", ",") + "%";
+    document.getElementById("cfgVariaveisPct").value = m.variaveisPct.toFixed(2).replace(".", ",") + "%";
+    document.getElementById("cfgICValor").textContent = m.ic.toFixed(5).replace(".", ",");
+    document.getElementById("cfgICPorcentagem").textContent = `(${m.custoProdutoPct.toFixed(3).replace(".", ",")}% do preço)`;
+    document.getElementById("resumoICHeader").textContent = `IC Atual: ${m.ic.toFixed(5).replace(".", ",")} (${m.custoProdutoPct.toFixed(2).replace(".", ",")}%)`;
+  }
+
+  function switchTabAtelie(tab, btn) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-precificacao").classList.add("hidden");
+    document.getElementById("tab-orcamentos").classList.add("hidden");
+    document.getElementById("tab-producao").classList.add("hidden");
+    document.getElementById("tab-" + tab).classList.remove("hidden");
+    if (tab === "precificacao") renderFichas();
+    if (tab === "orcamentos") renderOrcamentos();
+    if (tab === "producao") renderProducao();
+  }
+
+  // ==================== FICHAS TÉCNICAS DE PRECIFICAÇÃO ====================
+  let materiaisModalTemp = [];
+  let cortesAuxTemp = [];
+
+  function openModalFichaTecnica() {
+    document.getElementById("tituloModalFicha").textContent = "📐 Nova Ficha Técnica de Precificação";
+    document.getElementById("fichaEditId").value = "";
+    document.getElementById("fNome").value = "";
+    document.getElementById("fCategoria").value = "Organizadores & Cases";
+    document.getElementById("fHoras").value = 1;
+    document.getElementById("fValorHora").value = configIC.valorHoraPadrao || 13;
+    document.getElementById("fPrecoPraticado").value = "";
+    document.getElementById("boxAuxCorte").classList.add("hidden");
+
+    materiaisModalTemp = [
+      { nome: "Tecido / Fio Principal", obs: "", custo: 0 },
+      { nome: "Manta / Enchimento / Estruturador", obs: "", custo: 0 },
+      { nome: "Zíper / Cursor / Ferragens", obs: "", custo: 0 },
+      { nome: "Etiqueta / Acabamento", obs: "", custo: 0 }
+    ];
+    renderMateriaisModal();
+    recalcularTotaisFichaModal();
+    document.getElementById("modalFichaTecnica").classList.add("open");
+  }
+
+  function editarFichaTecnica(id) {
+    const f = fichas.find(x => x.id === id);
+    if (!f) return;
+    document.getElementById("tituloModalFicha").textContent = "✏️ Editar Ficha Técnica";
+    document.getElementById("fichaEditId").value = f.id;
+    document.getElementById("fNome").value = f.nome;
+    document.getElementById("fCategoria").value = f.categoria || "Organizadores & Cases";
+    document.getElementById("fHoras").value = f.horas || 1;
+    document.getElementById("fValorHora").value = f.valorHora || configIC.valorHoraPadrao || 13;
+    document.getElementById("fPrecoPraticado").value = f.precoPraticado || "";
+    document.getElementById("boxAuxCorte").classList.add("hidden");
+
+    materiaisModalTemp = JSON.parse(JSON.stringify(f.materiais || []));
+    renderMateriaisModal();
+    recalcularTotaisFichaModal();
+    document.getElementById("modalFichaTecnica").classList.add("open");
+  }
+
+  function adicionarLinhaMaterialFicha() {
+    materiaisModalTemp.push({ nome: "", obs: "", custo: 0 });
+    renderMateriaisModal();
+  }
+
+  function removerLinhaMaterialFicha(idx) {
+    materiaisModalTemp.splice(idx, 1);
+    renderMateriaisModal();
+    recalcularTotaisFichaModal();
+  }
+
+  function renderMateriaisModal() {
+    const tbody = document.getElementById("fichaMateriaisBody");
+    tbody.innerHTML = materiaisModalTemp.map((m, idx) => `
+      <tr>
+        <td><input type="text" placeholder="Ex: Tecido Tricoline" value="${(m.nome || '').replace(/"/g, '&quot;')}" onchange="materiaisModalTemp[${idx}].nome = this.value" /></td>
+        <td><input type="text" placeholder="Ex: 0,43 m²" value="${(m.obs || '').replace(/"/g, '&quot;')}" onchange="materiaisModalTemp[${idx}].obs = this.value" /></td>
+        <td><input type="number" step="0.01" value="${m.custo || 0}" oninput="materiaisModalTemp[${idx}].custo = Number(this.value) || 0; recalcularTotaisFichaModal();" /></td>
+        <td><button class="btn btn-danger btn-sm" onclick="removerLinhaMaterialFicha(${idx})">X</button></td>
+      </tr>
+    `).join("");
+  }
+
+  // Calculadora Auxiliar de Corte / m² (Aba "Aux Valor Material")
+  function toggleAuxCorte() {
+    const box = document.getElementById("boxAuxCorte");
+    box.classList.toggle("hidden");
+    if (!box.classList.contains("hidden") && cortesAuxTemp.length === 0) {
+      cortesAuxTemp = [
+        { desc: "Corte 1", larg: 0.40, comp: 0.27 },
+        { desc: "Corte 2", larg: 0.40, comp: 0.27 }
+      ];
+      renderCortesAux();
+    }
+  }
+
+  function adicionarLinhaCorteAux() {
+    cortesAuxTemp.push({ desc: `Corte ${cortesAuxTemp.length + 1}`, larg: 0, comp: 0 });
+    renderCortesAux();
+  }
+
+  function removerLinhaCorteAux(idx) {
+    cortesAuxTemp.splice(idx, 1);
+    renderCortesAux();
+  }
+
+  function renderCortesAux() {
+    const tbody = document.getElementById("auxCortesBody");
+    tbody.innerHTML = cortesAuxTemp.map((c, idx) => {
+      const area = (Number(c.larg) || 0) * (Number(c.comp) || 0);
+      return `
+        <tr>
+          <td><input type="text" value="${c.desc}" onchange="cortesAuxTemp[${idx}].desc = this.value" /></td>
+          <td><input type="number" step="0.01" value="${c.larg}" oninput="cortesAuxTemp[${idx}].larg = Number(this.value) || 0; recalcularAuxCorte();" /></td>
+          <td><input type="number" step="0.01" value="${c.comp}" oninput="cortesAuxTemp[${idx}].comp = Number(this.value) || 0; recalcularAuxCorte();" /></td>
+          <td id="auxAreaRow_${idx}" style="font-weight:600;">${area.toFixed(4)} m²</td>
+          <td><button class="btn btn-danger btn-sm" onclick="removerLinhaCorteAux(${idx})">X</button></td>
+        </tr>
+      `;
+    }).join("");
+    recalcularAuxCorte();
+  }
+
+  function recalcularAuxCorte() {
+    const largC = Math.max(0.01, Number(document.getElementById("auxLargCompra").value) || 1.4);
+    const compC = Math.max(0.01, Number(document.getElementById("auxCompCompra").value) || 1.0);
+    const valorPago = Number(document.getElementById("auxValorPago").value) || 0;
+    const m2Comprado = largC * compC;
+    const valorM2 = valorPago / m2Comprado;
+
+    let areaTotal = 0;
+    cortesAuxTemp.forEach((c, idx) => {
+      const area = (Number(c.larg) || 0) * (Number(c.comp) || 0);
+      areaTotal += area;
+      const cell = document.getElementById(`auxAreaRow_${idx}`);
+      if (cell) cell.textContent = area.toFixed(4) + " m²";
+    });
+
+    const custoFinal = valorM2 * areaTotal;
+    document.getElementById("auxValorM2").textContent = "R$ " + formatBRL(valorM2);
+    document.getElementById("auxAreaTotal").textContent = areaTotal.toFixed(4) + " m²";
+    document.getElementById("auxCustoFinal").textContent = "R$ " + formatBRL(custoFinal);
+    return { valorM2, areaTotal, custoFinal };
+  }
+
+  function enviarAuxParaMateriais() {
+    const nome = document.getElementById("auxMatNome").value.trim() || "Material por Metro/m²";
+    const { areaTotal, custoFinal } = recalcularAuxCorte();
+    materiaisModalTemp.push({
+      nome,
+      obs: `${areaTotal.toFixed(4)} m²`,
+      custo: Number(custoFinal.toFixed(2))
+    });
+    renderMateriaisModal();
+    recalcularTotaisFichaModal();
+    document.getElementById("boxAuxCorte").classList.add("hidden");
+  }
+
+  function recalcularTotaisFichaModal() {
+    const mIC = calcularMetricasIC();
+    const totalMat = materiaisModalTemp.reduce((acc, m) => acc + (Number(m.custo) || 0), 0);
+    const horas = Number(document.getElementById("fHoras").value) || 0;
+    const valorHora = Number(document.getElementById("fValorHora").value) || 0;
+    const totalMaoObra = horas * valorHora;
+    const custoDireto = totalMat + totalMaoObra;
+    const precoSugerido = mIC.ic > 0 ? (custoDireto / mIC.ic) : custoDireto;
+
+    document.getElementById("resModalMat").textContent = "R$ " + formatBRL(totalMat);
+    document.getElementById("resModalMaoObra").textContent = "R$ " + formatBRL(totalMaoObra);
+    document.getElementById("resModalCustoTotal").textContent = "R$ " + formatBRL(custoDireto);
+    document.getElementById("resModalPrecoSugerido").textContent = "R$ " + formatBRL(precoSugerido);
+  }
+
+  function salvarFichaTecnica() {
+    const nome = document.getElementById("fNome").value.trim();
+    if (!nome) return alert("Informe o nome da peça.");
+    const editId = document.getElementById("fichaEditId").value;
+    const categoria = document.getElementById("fCategoria").value;
+    const horas = Number(document.getElementById("fHoras").value) || 0;
+    const valorHora = Number(document.getElementById("fValorHora").value) || 0;
+    const precoPraticado = Number(document.getElementById("fPrecoPraticado").value) || 0;
+    const materiaisLimpos = materiaisModalTemp.filter(m => (m.nome || "").trim() !== "" || (Number(m.custo) || 0) > 0);
+
+    if (editId) {
+      const idx = fichas.findIndex(x => String(x.id) === String(editId));
+      if (idx > -1) {
+        fichas[idx] = { ...fichas[idx], nome, categoria, materiais: materiaisLimpos, horas, valorHora, precoPraticado };
+      }
+    } else {
+      fichas.unshift({
+        id: Date.now(),
+        nome,
+        categoria,
+        materiais: materiaisLimpos,
+        horas,
+        valorHora,
+        precoPraticado
+      });
+    }
+
+    salvarDadosAtelie();
+    closeModal("modalFichaTecnica");
+    renderFichas();
+  }
+
+  function removerFichaTecnica(id) {
+    if (confirm("Excluir esta ficha técnica de precificação?")) {
+      fichas = fichas.filter(f => f.id !== id);
+      salvarDadosAtelie();
+      renderFichas();
+    }
+  }
+
+  function enviarFichaParaCatalogo(id) {
+    const f = fichas.find(x => x.id === id);
+    if (!f) return;
+    const mIC = calcularMetricasIC();
+    const custoMat = (f.materiais || []).reduce((acc, m) => acc + (Number(m.custo) || 0), 0);
+    const custoMaoObra = (Number(f.horas) || 0) * (Number(f.valorHora) || 0);
+    const custoDireto = custoMat + custoMaoObra;
+    const precoCalculado = Number((custoDireto / mIC.ic).toFixed(2));
+    const precoFinal = (Number(f.precoPraticado) || 0) > 0 ? Number(f.precoPraticado) : precoCalculado;
+
+    const existente = catalogoAtelie.find(c => c.nome.toLowerCase() === f.nome.toLowerCase());
+    if (existente) {
+      existente.custoMat = Number(custoDireto.toFixed(2));
+      existente.horas = f.horas;
+      existente.valorHora = f.valorHora;
+      existente.precoVenda = precoFinal;
+    } else {
+      catalogoAtelie.unshift({
+        id: Date.now(),
+        nome: f.nome,
+        tecnica: f.categoria || "Organizadores & Cases",
+        qtdPronta: 0,
+        custoMat: Number(custoDireto.toFixed(2)),
+        horas: f.horas,
+        valorHora: f.valorHora,
+        precoVenda: precoFinal
+      });
+    }
+    salvarDadosAtelie();
+    alert(`"${f.nome}" sincronizado com o Catálogo do Ateliê pelo valor de R$ ${formatBRL(precoFinal)}!`);
+  }
+
+  function renderFichas() {
+    const mIC = calcularMetricasIC();
+    const busca = (document.getElementById("filtroBuscaFicha")?.value || "").toLowerCase();
+    const filtradas = fichas.filter(f => !busca || f.nome.toLowerCase().includes(busca) || (f.categoria || "").toLowerCase().includes(busca));
+
+    // KPIs
+    const ticketMedio = fichas.length > 0
+      ? fichas.reduce((acc, f) => {
+          const cMat = (f.materiais || []).reduce((s, m) => s + (Number(m.custo) || 0), 0);
+          const cTot = cMat + ((Number(f.horas) || 0) * (Number(f.valorHora) || 0));
+          return acc + (cTot / mIC.ic);
+        }, 0) / fichas.length
+      : 0;
+
+    document.getElementById("kpisPrecificacao").innerHTML = `
+      <div class="kpi-card"><span>Fichas técnicas salvas</span><strong>${fichas.length} peça(s)</strong></div>
+      <div class="kpi-card"><span>Índice de Comercialização (IC)</span><strong style="color:#c4b5fd">${mIC.ic.toFixed(5).replace(".", ",")}</strong></div>
+      <div class="kpi-card"><span>Despesas Fixas + Pró-labore</span><strong style="color:#fbbf24">R$ ${formatBRL(mIC.totalFixasReais)} (${mIC.fixasPct.toFixed(1)}%)</strong></div>
+      <div class="kpi-card"><span>Ticket médio calculado (÷ IC)</span><strong style="color:var(--green-text)">R$ ${formatBRL(ticketMedio)}</strong></div>
+    `;
+
+    const tbody = document.getElementById("fichasBody");
+    if (filtradas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">Nenhuma ficha técnica encontrada.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtradas.map(f => {
+      const matList = (f.materiais || []).filter(m => (Number(m.custo) || 0) > 0 || (m.nome || "").trim() !== "");
+      const custoMat = matList.reduce((acc, m) => acc + (Number(m.custo) || 0), 0);
+      const custoMaoObra = (Number(f.horas) || 0) * (Number(f.valorHora) || 0);
+      const custoDireto = custoMat + custoMaoObra;
+      const precoIC = custoDireto / mIC.ic;
+      const precoFinal = (Number(f.precoPraticado) || 0) > 0 ? Number(f.precoPraticado) : precoIC;
+      const lucroLiquidoEst = precoFinal * (mIC.lucroPct / 100);
+
+      const resumoMats = matList.slice(0, 4).map(m =>
+        `<div class="cell-sub">• ${m.nome}${m.obs ? ` (${m.obs})` : ""}: <strong>R$ ${formatBRL(m.custo)}</strong></div>`
+      ).join("") + (matList.length > 4 ? `<div class="cell-sub">+ ${matList.length - 4} item(ns)...</div>` : "");
+
+      return `
+        <tr>
+          <td>
+            <div class="prod-title">${f.nome}</div>
+            <span class="badge badge-leve">${f.categoria || "Artesanal"}</span>
+          </td>
+          <td>${resumoMats || '<span class="cell-sub">Sem materiais lançados</span>'}</td>
+          <td class="cell-main">R$ ${formatBRL(custoMat)}</td>
+          <td>
+            <div class="cell-main">R$ ${formatBRL(custoMaoObra)}</div>
+            <div class="cell-sub">${f.horas}h × R$ ${formatBRL(f.valorHora)}/h</div>
+          </td>
+          <td><strong style="color:#fbbf24;">R$ ${formatBRL(custoDireto)}</strong></td>
+          <td>
+            <div style="background:rgba(124,93,250,0.12); border:1px solid rgba(124,93,250,0.35); border-radius:8px; padding:6px 10px;">
+              <div style="font-size:1.02rem; font-weight:700; color:var(--green-text);">R$ ${formatBRL(precoIC)}</div>
+              ${(Number(f.precoPraticado) || 0) > 0 ? `<div class="cell-sub">Praticado: <strong>R$ ${formatBRL(f.precoPraticado)}</strong></div>` : `<div class="cell-sub">Fórmula: R$ ${formatBRL(custoDireto)} ÷ ${mIC.ic.toFixed(4)}</div>`}
+            </div>
+          </td>
+          <td>
+            <div class="cell-main" style="color:#c4b5fd;">R$ ${formatBRL(lucroLiquidoEst)}</div>
+            <div class="cell-sub">Margem: ${mIC.lucroPct}% + Pró-labore</div>
+          </td>
+          <td>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+              <button class="btn btn-sm" onclick="editarFichaTecnica(${f.id})">✏️ Editar Ficha</button>
+              <button class="btn btn-sm" style="border-color:var(--green-text); color:var(--green-text);" onclick="enviarFichaParaCatalogo(${f.id})">🏷️ Enviar p/ Catálogo</button>
+              <button class="btn btn-danger btn-sm" onclick="removerFichaTecnica(${f.id})">Excluir</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  // ==================== ORÇAMENTOS ====================
+  let orcamentoItensTemp = [];
+
+  function openModalOrcamento() {
+    document.getElementById("orcNum").value = "#000" + (orcamentos.length + 1);
+    document.getElementById("orcData").value = new Date().toISOString().split("T")[0];
+    document.getElementById("orcCliente").value = "";
+    document.getElementById("orcTel").value = "";
+    document.getElementById("orcEndereco").value = "";
+    document.getElementById("orcPgto").value = "Pix ou Boleto Bancário";
+    document.getElementById("orcTermos").value = "Este orçamento é válido por 30 dias.";
+    orcamentoItensTemp = [
+      { item: "Kit presenteável", desc: "• 1 Necesserie\n• 1 Creme Hidratante Eudora", valorUn: 50.00, quant: 1 }
+    ];
+    renderOrcItensModal();
+    document.getElementById("modalOrcamento").classList.add("open");
+  }
+
+  function adicionarLinhaItemOrcamento() {
+    orcamentoItensTemp.push({ item: "", desc: "", valorUn: 0, quant: 1 });
+    renderOrcItensModal();
+  }
+
+  function removerLinhaItemOrcamento(idx) {
+    orcamentoItensTemp.splice(idx, 1);
+    renderOrcItensModal();
+  }
+
+  function renderOrcItensModal() {
+    const tbody = document.getElementById("orcItensBody");
+    tbody.innerHTML = orcamentoItensTemp.map((it, idx) => `
+      <tr>
+        <td><input type="text" placeholder="Nome do item" value="${(it.item || '').replace(/"/g, '&quot;')}" onchange="orcamentoItensTemp[${idx}].item = this.value" /></td>
+        <td><input type="text" placeholder="Descrição em bullets" value="${(it.desc || '').replace(/"/g, '&quot;')}" onchange="orcamentoItensTemp[${idx}].desc = this.value" /></td>
+        <td><input type="number" step="0.01" value="${it.valorUn || 0}" oninput="orcamentoItensTemp[${idx}].valorUn = Number(this.value) || 0" /></td>
+        <td><input type="number" min="1" value="${it.quant || 1}" oninput="orcamentoItensTemp[${idx}].quant = Number(this.value) || 1" /></td>
+        <td><button class="btn btn-danger btn-sm" onclick="removerLinhaItemOrcamento(${idx})">X</button></td>
+      </tr>
+    `).join("");
+  }
+
+  function salvarEVisualizarOrcamento() {
+    const num = document.getElementById("orcNum").value.trim() || "#00001";
+    const data = document.getElementById("orcData").value || new Date().toISOString().split("T")[0];
+    const cliente = document.getElementById("orcCliente").value.trim() || "Cliente Ateliê";
+    const tel = document.getElementById("orcTel").value.trim();
+    const endereco = document.getElementById("orcEndereco").value.trim();
+    const pgto = document.getElementById("orcPgto").value.trim();
+    const termos = document.getElementById("orcTermos").value.trim();
+
+    const itensValidos = orcamentoItensTemp.filter(i => (i.item || "").trim() !== "");
+    if (itensValidos.length === 0) return alert("Adicione pelo menos um item ao orçamento.");
+
+    const total = itensValidos.reduce((acc, i) => acc + ((Number(i.valorUn) || 0) * (Number(i.quant) || 1)), 0);
+
+    const novoOrc = {
+      id: Date.now(),
+      num,
+      data,
+      cliente,
+      tel,
+      endereco,
+      pgto,
+      termos,
+      itens: itensValidos,
+      total
+    };
+
+    orcamentos.unshift(novoOrc);
+    salvarDadosAtelie();
+    closeModal("modalOrcamento");
+    renderOrcamentos();
+    abrirVisualizacaoImpressao(novoOrc.id);
+  }
+
+  function abrirVisualizacaoImpressao(id) {
+    const o = orcamentos.find(x => x.id === id);
+    if (!o) return;
+
+    document.getElementById("prevNum").textContent = o.num;
+    document.getElementById("prevData").textContent = formatDateBR(o.data);
+
+    let infoHtml = `<b>${o.cliente}</b>`;
+    if (o.tel) infoHtml += `<br>${o.tel}`;
+    if (o.endereco) infoHtml += `<br>${o.endereco}`;
+    document.getElementById("prevClienteInfo").innerHTML = infoHtml;
+
+    const tbody = document.getElementById("prevItensBody");
+    tbody.innerHTML = o.itens.map(it => {
+      const descFormatada = (it.desc || "").replace(/\n/g, '<br>');
+      return `
+        <tr>
+          <td style="font-weight: 700; color: var(--terracotta); vertical-align: top;">${it.item}</td>
+          <td style="font-size: 0.85rem; color: #5a4538; vertical-align: top; line-height: 1.4;">${descFormatada}</td>
+          <td style="text-align: right; vertical-align: top;">R$ ${formatBRL(it.valorUn)}</td>
+          <td style="text-align: center; vertical-align: top;">${it.quant}</td>
+        </tr>
+      `;
+    }).join("");
+
+    document.getElementById("prevTotal").textContent = formatBRL(o.total);
+    document.getElementById("prevPgto").textContent = o.pgto;
+    document.getElementById("prevTermos").textContent = o.termos;
+
+    document.getElementById("modalVisualizacaoImpressao").classList.add("open");
+  }
+
+  function renderOrcamentos() {
+    const tbody = document.getElementById("orcamentosListBody");
+    if (!tbody) return;
+    if (orcamentos.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:24px;">Nenhum orçamento emitido.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = orcamentos.map(o => `
+      <tr>
+        <td>
+          <div class="prod-title">${o.num}</div>
+          <div class="cell-sub">📅 ${formatDateBR(o.data)}</div>
+        </td>
+        <td class="cell-main">${o.cliente}</td>
+        <td class="cell-sub">${o.endereco || "Não informado"}</td>
+        <td style="font-weight:700; color:var(--terracotta);">R$ ${formatBRL(o.total)}</td>
+        <td class="cell-sub">${o.termos}</td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-primary" onclick="abrirVisualizacaoImpressao(${o.id})">🖨️ Ver / Imprimir</button>
+            <button class="btn btn-danger btn-sm" onclick="orcamentos = orcamentos.filter(x=>x.id!==${o.id}); salvarDadosAtelie(); renderOrcamentos()">Excluir</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  // ==================== ENCOMENDAS & CATÁLOGO PRONTA ENTREGA ====================
+  function openModalEncomenda() {
+    document.getElementById("encCliente").value = "";
+    const dt = new Date();
+    dt.setDate(dt.getDate() + 7);
+    document.getElementById("encPrazo").value = dt.toISOString().split("T")[0];
+    const mIC = calcularMetricasIC();
+
+    const opcoesFichas = fichas.map(f => {
+      const cMat = (f.materiais || []).reduce((s, m) => s + (Number(m.custo) || 0), 0);
+      const cTot = cMat + ((Number(f.horas) || 0) * (Number(f.valorHora) || 0));
+      const pSug = (Number(f.precoPraticado) || 0) > 0 ? f.precoPraticado : (cTot / mIC.ic);
+      return `<option value="F:${f.id}" data-nome="${f.nome}" data-preco="${pSug.toFixed(2)}">📐 [Ficha] ${f.nome} — R$ ${formatBRL(pSug)}</option>`;
+    }).join("");
+
+    const opcoesCat = catalogoAtelie.map(c =>
+      `<option value="C:${c.id}" data-nome="${c.nome}" data-preco="${Number(c.precoVenda).toFixed(2)}">🏷️ [Catálogo] ${c.nome} — R$ ${formatBRL(c.precoVenda)}</option>`
+    ).join("");
+
+    const selOrigem = document.getElementById("encSelectOrigem");
+    if (selOrigem) selOrigem.innerHTML = `<option value="">-- Selecionar peça precificada (ou digitar abaixo) --</option>` + opcoesFichas + opcoesCat;
+    document.getElementById("encPeca").value = "";
+    document.getElementById("encDetalhes").value = "";
+    document.getElementById("encQtd").value = 1;
+    document.getElementById("encValorTotal").value = "";
+    document.getElementById("encSinal").value = 0;
+    document.getElementById("encStatus").value = "A fazer";
+    document.getElementById("modalEncomenda").classList.add("open");
+  }
+
+  function preencherOrigemEncomenda() {
+    const sel = document.getElementById("encSelectOrigem");
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.nome) {
+      document.getElementById("encPeca").value = opt.dataset.nome;
+      const qtd = Math.max(1, Number(document.getElementById("encQtd").value) || 1);
+      document.getElementById("encValorTotal").value = (Number(opt.dataset.preco) * qtd).toFixed(2);
+    }
+  }
+
+  function salvarEncomenda() {
+    const cliente = document.getElementById("encCliente").value.trim();
+    const pecaNome = document.getElementById("encPeca").value.trim();
+    if (!cliente || !pecaNome) return alert("Informe o cliente e a peça.");
+
+    encomendasAtelie.unshift({
+      id: Date.now(),
+      cliente,
+      prazo: document.getElementById("encPrazo").value || new Date().toISOString().split("T")[0],
+      pecaNome,
+      detalhes: document.getElementById("encDetalhes").value.trim(),
+      qtd: Math.max(1, Number(document.getElementById("encQtd").value) || 1),
+      valorTotal: Number(document.getElementById("encValorTotal").value) || 0,
+      sinal: Number(document.getElementById("encSinal").value) || 0,
+      formaPgto: "Sinal + Entrega",
+      status: document.getElementById("encStatus").value
+    });
+
+    salvarDadosAtelie();
+    closeModal("modalEncomenda");
+    renderProducao();
+  }
+
+  function alterarStatusEncomenda(id, status) {
+    const enc = encomendasAtelie.find(x => x.id === id);
+    if (enc) {
+      enc.status = status;
+      salvarDadosAtelie();
+      renderProducao();
+    }
+  }
+
+  function removerEncomenda(id) {
+    if (confirm("Remover esta encomenda?")) {
+      encomendasAtelie = encomendasAtelie.filter(x => x.id !== id);
+      salvarDadosAtelie();
+      renderProducao();
+    }
+  }
+
+  function openModalCatalogoItem() {
+    document.getElementById("catNome").value = "";
+    document.getElementById("catCategoria").value = "Organizadores & Cases";
+    document.getElementById("catQtd").value = 1;
+    document.getElementById("catCusto").value = "";
+    document.getElementById("catVenda").value = "";
+    document.getElementById("modalCatalogoItem").classList.add("open");
+  }
+
+  function salvarCatalogoItem() {
+    const nome = document.getElementById("catNome").value.trim();
+    if (!nome) return alert("Informe o nome da peça.");
+    catalogoAtelie.unshift({
+      id: Date.now(),
+      nome,
+      tecnica: document.getElementById("catCategoria").value,
+      qtdPronta: Math.max(0, Number(document.getElementById("catQtd").value) || 0),
+      custoMat: Number(document.getElementById("catCusto").value) || 0,
+      horas: 0,
+      valorHora: 0,
+      precoVenda: Number(document.getElementById("catVenda").value) || 0
+    });
+    salvarDadosAtelie();
+    closeModal("modalCatalogoItem");
+    renderProducao();
+  }
+
+  function alterarQtdCatalogo(id, delta) {
+    const item = catalogoAtelie.find(x => x.id === id);
+    if (item) {
+      item.qtdPronta = Math.max(0, (Number(item.qtdPronta) || 0) + delta);
+      salvarDadosAtelie();
+      renderProducao();
+    }
+  }
+
+  function removerCatalogoItem(id) {
+    if (confirm("Remover esta peça do catálogo?")) {
+      catalogoAtelie = catalogoAtelie.filter(x => x.id !== id);
+      salvarDadosAtelie();
+      renderProducao();
+    }
+  }
+
+  function renderProducao() {
+    const hoje = new Date();
+    const ativas = encomendasAtelie.filter(e => e.status !== "Entregue");
+    const saldoAReceber = ativas.reduce((acc, e) => acc + Math.max(0, (Number(e.valorTotal) || 0) - (Number(e.sinal) || 0)), 0);
+    const totalPronta = catalogoAtelie.reduce((acc, c) => acc + (Number(c.qtdPronta) || 0), 0);
+    const valorPronta = catalogoAtelie.reduce((acc, c) => acc + ((Number(c.qtdPronta) || 0) * (Number(c.precoVenda) || 0)), 0);
+
+    const kpisPr = document.getElementById("kpisProducao");
+    if (kpisPr) {
+      kpisPr.innerHTML = `
+        <div class="kpi-card"><span>Encomendas em aberto</span><strong style="color:#fbbf24">${ativas.length} pedido(s)</strong></div>
+        <div class="kpi-card"><span>Saldo a receber (Encomendas)</span><strong style="color:var(--green-text)">R$ ${formatBRL(saldoAReceber)}</strong></div>
+        <div class="kpi-card"><span>Peças pronta entrega</span><strong style="color:#38bdf8">${totalPronta} un.</strong></div>
+        <div class="kpi-card"><span>Valor em pronta entrega</span><strong style="color:#c4b5fd">R$ ${formatBRL(valorPronta)}</strong></div>
+      `;
+    }
+
+    const buscaEnc = (document.getElementById("filtroBuscaEncomenda")?.value || "").toLowerCase();
+    const fStatus = document.getElementById("filtroStatusEncomenda")?.value || "ATIVAS";
+    const encFiltradas = encomendasAtelie
+      .filter(e => {
+        if (fStatus === "ATIVAS" && e.status === "Entregue") return false;
+        if (fStatus !== "ATIVAS" && fStatus !== "TODAS" && e.status !== fStatus) return false;
+        if (buscaEnc && !e.cliente.toLowerCase().includes(buscaEnc) && !e.pecaNome.toLowerCase().includes(buscaEnc)) return false;
+        return true;
+      })
+      .sort((a, b) => a.prazo.localeCompare(b.prazo));
+
+    const encBody = document.getElementById("encomendasBody");
+    if (encBody) {
+      if (encFiltradas.length === 0) {
+        encBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">Nenhuma encomenda encontrada.</td></tr>`;
+      } else {
+        encBody.innerHTML = encFiltradas.map(e => {
+          const diff = diffDays(hoje, new Date(e.prazo + "T00:00:00"));
+          let prazoTag = e.status === "Entregue" ? `<span style="color:var(--green-text);">Concluída</span>`
+            : (diff < 0 ? `<span style="color:var(--red-text); font-weight:600;">Atrasada (${Math.abs(diff)}d)</span>`
+            : (diff <= 3 ? `<span style="color:var(--orange-text); font-weight:600;">Urgente (${diff}d)</span>` : `faltam ${diff}d`));
+          const restante = Math.max(0, (Number(e.valorTotal) || 0) - (Number(e.sinal) || 0));
+          const badgeEtapa = e.status === "Entregue" ? "badge-normal" : (e.status === "Pronta" ? "badge-leve" : (e.status === "Em produção" ? "badge-promo" : "badge-queima"));
+
+          return `
+            <tr>
+              <td>
+                <div class="prod-title">${e.cliente}</div>
+                <div class="cell-sub">📅 ${formatDateBR(e.prazo)} · ${prazoTag}</div>
+              </td>
+              <td>
+                <div class="cell-main"><strong>${e.qtd}x</strong> ${e.pecaNome}</div>
+                ${e.detalhes ? `<div class="cell-sub">✨ ${e.detalhes}</div>` : ""}
+              </td>
+              <td>
+                <div class="cell-main" style="color:var(--green-text);">R$ ${formatBRL(e.valorTotal)}</div>
+                <div class="cell-sub">Sinal: R$ ${formatBRL(e.sinal)} · Resta: <strong>R$ ${formatBRL(restante)}</strong></div>
+              </td>
+              <td>
+                <select onchange="alterarStatusEncomenda(${e.id}, this.value)" class="badge ${badgeEtapa}" style="border:none; cursor:pointer;">
+                  <option value="A fazer" ${e.status === "A fazer" ? "selected" : ""}>A fazer</option>
+                  <option value="Em produção" ${e.status === "Em produção" ? "selected" : ""}>Em produção</option>
+                  <option value="Pronta" ${e.status === "Pronta" ? "selected" : ""}>Pronta</option>
+                  <option value="Entregue" ${e.status === "Entregue" ? "selected" : ""}>Entregue</option>
+                </select>
+              </td>
+              <td><button class="btn btn-danger btn-sm" onclick="removerEncomenda(${e.id})">X</button></td>
+            </tr>
+          `;
+        }).join("");
+      }
+    }
+
+    const buscaCat = (document.getElementById("filtroBuscaCatalogo")?.value || "").toLowerCase();
+    const catFiltrado = catalogoAtelie.filter(c => !buscaCat || c.nome.toLowerCase().includes(buscaCat));
+    const catBody = document.getElementById("catalogoBody");
+    if (catBody) {
+      if (catFiltrado.length === 0) {
+        catBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:24px;">Nenhuma peça cadastrada.</td></tr>`;
+      } else {
+        catBody.innerHTML = catFiltrado.map(c => `
+          <tr>
+            <td>
+              <div class="cell-main">${c.nome}</div>
+              <div class="cell-sub">${c.tecnica || "Artesanal"}</div>
+            </td>
+            <td>
+              <div class="qty-controls">
+                <button class="qty-btn" onclick="alterarQtdCatalogo(${c.id}, -1)">-</button>
+                <span class="cell-main">${c.qtdPronta}</span>
+                <button class="qty-btn" onclick="alterarQtdCatalogo(${c.id}, 1)">+</button>
+              </div>
+            </td>
+            <td>
+              <div class="cell-main" style="color:var(--green-text);">R$ ${formatBRL(c.precoVenda)}</div>
+              <div class="cell-sub">Custo: R$ ${formatBRL(c.custoMat)}</div>
+            </td>
+            <td><button class="btn btn-danger btn-sm" onclick="removerCatalogoItem(${c.id})">X</button></td>
+          </tr>
+        `).join("");
+      }
+    }
+  }
+
+  function exportarExcelAtelie() {
+    const mIC = calcularMetricasIC();
+    const wb = XLSX.utils.book_new();
+
+    const rowsFichas = fichas.map(f => {
+      const cMat = (f.materiais || []).reduce((s, m) => s + (Number(m.custo) || 0), 0);
+      const cMO = (Number(f.horas) || 0) * (Number(f.valorHora) || 0);
+      const cTot = cMat + cMO;
+      const pIC = cTot / mIC.ic;
+      return {
+        Peca: f.nome,
+        Categoria: f.categoria,
+        Materiais_Detalhados: (f.materiais || []).map(m => `${m.nome} (${m.obs || '-'}): R$ ${formatBRL(m.custo)}`).join("; "),
+        Custo_Materiais_R$: Number(cMat.toFixed(2)),
+        Horas_Producao: f.horas,
+        Valor_Hora_R$: f.valorHora,
+        Custo_Mao_Obra_R$: Number(cMO.toFixed(2)),
+        Custo_Direto_Total_R$: Number(cTot.toFixed(2)),
+        Indice_Comercializacao_IC: Number(mIC.ic.toFixed(5)),
+        Preco_Sugerido_IC_R$: Number(pIC.toFixed(2)),
+        Preco_Praticado_R$: f.precoPraticado || Number(pIC.toFixed(2))
+      };
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rowsFichas), "Fichas_Precificacao");
+
+    if (catalogoAtelie.length > 0) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(catalogoAtelie), "Catalogo_Pronta_Entrega");
+    }
+    if (encomendasAtelie.length > 0) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(encomendasAtelie), "Encomendas_Clientes");
+    }
+
+    XLSX.writeFile(wb, "Dona_Felis_Atelie_Precificacao.xlsx");
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+  carregarInputsConfigIC();
+  renderFichas();
+</script>
+</body>
+</html>
